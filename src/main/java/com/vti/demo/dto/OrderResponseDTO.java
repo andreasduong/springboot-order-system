@@ -7,6 +7,7 @@ public class OrderResponseDTO {
 
     private Long id;
     private Long customerId;
+    private String status;
     private Double totalAmount;
     private LocalDateTime createdAt;
     private List<OrderItemDTO> items;
@@ -17,12 +18,21 @@ public class OrderResponseDTO {
         return id;
     }
 
+
     public void setId(Long id) {
         this.id = id;
     }
 
     public Long getCustomerId() {
         return customerId;
+    }
+
+    public String getStatus() {
+        return status;
+    }
+
+    public void setStatus(String status) {
+        this.status = status;
     }
 
     public void setCustomerId(Long customerId) {

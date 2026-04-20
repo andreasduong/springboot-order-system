@@ -23,4 +23,6 @@ public class ProductController {
     public Product create(@RequestBody Product product) {
         return service.create(product);
     }
+
+
 }
