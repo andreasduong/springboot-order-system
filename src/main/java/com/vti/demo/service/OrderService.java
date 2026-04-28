@@ -48,7 +48,7 @@ public class OrderService {
         Order order = new Order();
         order.setCustomer(customer);
         order.setCreatedAt(LocalDateTime.now());
-        order.setStatus("CREATED");
+        order.setStatus(OrderStatus.CREATED);
 
         List<OrderItem> items = new ArrayList<>();
         double total = 0;
@@ -83,7 +83,7 @@ public class OrderService {
 
         order.setItems(items);
         order.setTotalAmount(total);
-        order.setStatus("CREATED");
+        order.setStatus(OrderStatus.CREATED);
 
         Order saved = orderRepository.save(order);
         return mapToResponse(saved);
@@ -117,7 +117,8 @@ public class OrderService {
         dto.setCustomerId(order.getCustomer().getId());
         dto.setCreatedAt(order.getCreatedAt());
         dto.setTotalAmount(order.getTotalAmount());
-        dto.setStatus(order.getStatus());
+        dto.setStatus(order.getStatus().name());
+
 
         dto.setItems(order.getItems().stream().map(item -> {
             OrderItemDTO itemDTO = new OrderItemDTO();
@@ -134,12 +135,23 @@ public class OrderService {
         Order order = orderRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Order not found"));
 
-        order.setStatus(newStatus);
+        OrderStatus current = order.getStatus();
+        OrderStatus next = OrderStatus.valueOf(newStatus);
+
+        //  CHẶN TRẠNG THÁI KẾT THÚC
+        if (current == OrderStatus.COMPLETED || current == OrderStatus.CANCELLED) {
+            throw new RuntimeException("Không thể thay đổi đơn đã kết thúc");
+        }
+
+        // CHẶN NHẢY BỪA
+        if (current == OrderStatus.CREATED && next == OrderStatus.SHIPPED) {
+            throw new RuntimeException("Không thể chuyển trực tiếp từ CREATED → SHIPPED");
+        }
+
+        order.setStatus(next);
         order.setUpdatedAt(LocalDateTime.now());
 
-        Order saved = orderRepository.save(order);
-
-        return mapToResponse(saved);
+        return mapToResponse(orderRepository.save(order));
     }
 
     public List<OrderResponseDTO> getByStatus(String status) {
@@ -149,8 +161,8 @@ public class OrderService {
                 .toList();
     }
 
-    public List<OrderResponseDTO> getByCustomer(Long customerId) {
-        return orderRepository.findByCustomerId(customerId)
+    public List<OrderResponseDTO> getByStatus(OrderStatus status) {
+        return orderRepository.findByStatus(status)
                 .stream()
                 .map(this::mapToResponse)
                 .toList();
@@ -163,5 +175,11 @@ public class OrderService {
                 .map(this::mapToResponse);
     }
 
+    public List<OrderResponseDTO> getByCustomer(Long customerId) {
+        return orderRepository.findByCustomerId(customerId)
+                .stream()
+                .map(this::mapToResponse)
+                .toList();
+    }
 
 }

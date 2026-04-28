@@ -1,7 +1,9 @@
 package com.vti.demo.controller;
 
+import com.vti.demo.dto.ApiResponse;
 import com.vti.demo.dto.OrderRequestDTO;
 import com.vti.demo.dto.OrderResponseDTO;
+import com.vti.demo.entity.OrderStatus;
 import com.vti.demo.service.OrderService;
 import jakarta.validation.Valid;
 import org.springframework.data.domain.Page;
@@ -21,11 +23,7 @@ public class OrderController {
     }
 
 
-    // CREATE ORDER
-    @PostMapping
-    public OrderResponseDTO createOrder(@Valid @RequestBody OrderRequestDTO request) {
-        return orderService.createOrder(request);
-    }
+
 
     // GET ORDERS WITH PAGINATION
     @GetMapping
@@ -57,12 +55,19 @@ public class OrderController {
     // filter
     @GetMapping("/filter/status")
     public List<OrderResponseDTO> getByStatus(@RequestParam String status) {
-        return orderService.getByStatus(status);
+        OrderStatus orderStatus = OrderStatus.valueOf(status);
+        return orderService.getByStatus(orderStatus);
     }
 
     // search
     @GetMapping("/search/customer")
     public List<OrderResponseDTO> getByCustomer(@RequestParam Long customerId) {
         return orderService.getByCustomer(customerId);
+    }
+
+    @PostMapping
+    public ApiResponse<OrderResponseDTO> createOrder(@Valid @RequestBody OrderRequestDTO request) {
+        OrderResponseDTO response = orderService.createOrder(request);
+        return new ApiResponse<>(true, response);
     }
 }

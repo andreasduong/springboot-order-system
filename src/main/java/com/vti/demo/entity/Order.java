@@ -20,8 +20,9 @@ public class Order {
     @JoinColumn(name = "customer_id")
     private Customer customer;
 
-    @Column(name = "status")
-    private String status;
+    @Enumerated(EnumType.STRING)
+    private OrderStatus status;
+
 
     @Column(name = "total_amount")
     private Double totalAmount;
