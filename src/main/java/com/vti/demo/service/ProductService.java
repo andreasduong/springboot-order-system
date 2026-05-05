@@ -19,4 +19,19 @@ public class ProductService {
     public Product create(Product product) {
         return productRepository.save(product);
     }
+    public Product getById(Long id) {
+        return productRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Product not found"));
+    }
+
+    public Product update(Long id, Product newProduct) {
+        Product product = productRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Product not found"));
+
+        product.setName(newProduct.getName());
+        product.setPrice(newProduct.getPrice());
+        product.setStock(newProduct.getStock());
+
+        return productRepository.save(product);
+    }
 }
